@@ -1,6 +1,6 @@
 import requests
 import hashlib
-import win32api
+from pefile import PE
 
 def NostaleVersionGet():
     files = requests.get("https://spark.gameforge.com/api/v1/patching/download/latest/nostale/default?locale=pl&architecture=x64&branchToken").json()['entries']
@@ -12,7 +12,7 @@ def NostaleVersionGet():
             download_file("http://patches.gameforge.com"+f['path'], f['file'])
             hashNostaleClient = md5(f['file'])
 
-    version = getFileProperties("NostaleClient.exe")['FileVersion']
+    version = fileversion("NostaleClient.exe")
     return {"hashNostaleClientX": hashNostaleClientX, "hashNostaleClient": hashNostaleClient, "version": version}
 
 def download_file(url, filename):
@@ -29,40 +29,8 @@ def md5(fname):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def getFileProperties(fname):
-    """
-    Read all properties of the given file return them as a dictionary.
-    """
-    propNames = ('Comments', 'InternalName', 'ProductName',
-        'CompanyName', 'LegalCopyright', 'ProductVersion',
-        'FileDescription', 'LegalTrademarks', 'PrivateBuild',
-        'FileVersion', 'OriginalFilename', 'SpecialBuild')
-
-    props = {'FixedFileInfo': None, 'StringFileInfo': None, 'FileVersion': None}
-
-    try:
-        # backslash as parm returns dictionary of numeric info corresponding to VS_FIXEDFILEINFO struc
-        fixedInfo = win32api.GetFileVersionInfo(fname, '\\')
-        props['FixedFileInfo'] = fixedInfo
-        props['FileVersion'] = "%d.%d.%d.%d" % (fixedInfo['FileVersionMS'] / 65536,
-                fixedInfo['FileVersionMS'] % 65536, fixedInfo['FileVersionLS'] / 65536,
-                fixedInfo['FileVersionLS'] % 65536)
-
-        # \VarFileInfo\Translation returns list of available (language, codepage)
-        # pairs that can be used to retreive string info. We are using only the first pair.
-        lang, codepage = win32api.GetFileVersionInfo(fname, '\\VarFileInfo\\Translation')[0]
-
-        # any other must be of the form \StringfileInfo\%04X%04X\parm_name, middle
-        # two are language/codepage pair returned from above
-
-        strInfo = {}
-        for propName in propNames:
-            strInfoPath = u'\\StringFileInfo\\%04X%04X\\%s' % (lang, codepage, propName)
-            ## print str_info
-            strInfo[propName] = win32api.GetFileVersionInfo(fname, strInfoPath)
-
-        props['StringFileInfo'] = strInfo
-    except:
-        pass
-
-    return props
+def fileversion(pename):
+    pe = PE(pename)
+    verinfo = pe.VS_FIXEDFILEINFO[0]
+    filever = (verinfo.FileVersionMS >> 16, verinfo.FileVersionMS & 0xFFFF, verinfo.FileVersionLS >> 16, verinfo.FileVersionLS & 0xFFFF)
+    return  "%d.%d.%d.%d" % filever

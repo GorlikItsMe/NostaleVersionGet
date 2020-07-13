@@ -1,3 +1,3 @@
 requests
 hashlib
-pypiwin32
+pefile

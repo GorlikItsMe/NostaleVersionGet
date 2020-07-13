@@ -2,6 +2,12 @@
 
 Get Nostale hashes used to auth to servers
 
+# Install
+```
+python3 -m pip install -r .\requirements.txt
+```
+
+# Example
 ```
 from NostaleVersionGet import NostaleVersionGet
 

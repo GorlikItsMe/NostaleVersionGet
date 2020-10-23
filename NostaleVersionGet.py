@@ -1,19 +1,37 @@
 import requests
 import hashlib
 from pefile import PE
+import time, json, os
 
-def NostaleVersionGet():
-    files = requests.get("https://spark.gameforge.com/api/v1/patching/download/latest/nostale/default?locale=pl&architecture=x64&branchToken").json()['entries']
-    for f in files:
-        if (f['file'] == "NostaleClientX.exe"):
-            download_file("http://patches.gameforge.com"+f['path'], f['file'])
-            hashNostaleClientX = md5(f['file'])
-        if (f['file'] == "NostaleClient.exe"):
-            download_file("http://patches.gameforge.com"+f['path'], f['file'])
-            hashNostaleClient = md5(f['file'])
+def NostaleVersionGet(filecache=False):
+    data = {'savetime': 0}
+    if(filecache):
+        try:
+            fp = open('NostaleVersionCache.json', "r")
+            data = json.load(fp)
+        except:
+            data = {'savetime': 0}
+    
+    if data['savetime'] < int(time.time()) - (5*60): # cache 5min
+        files = requests.get("https://spark.gameforge.com/api/v1/patching/download/latest/nostale/default?locale=pl&architecture=x64&branchToken").json()['entries']
+        for f in files:
+            if (f['file'] == "NostaleClientX.exe"):
+                download_file("http://patches.gameforge.com"+f['path'], f['file'])
+                hashNostaleClientX = md5(f['file'])
+                os.remove(f['file']) 
+            if (f['file'] == "NostaleClient.exe"):
+                download_file("http://patches.gameforge.com"+f['path'], f['file'])
+                hashNostaleClient = md5(f['file'])
+                os.remove(f['file']) 
 
-    version = fileversion("NostaleClient.exe")
-    return {"hashNostaleClientX": hashNostaleClientX, "hashNostaleClient": hashNostaleClient, "version": version}
+        version = fileversion("NostaleClient.exe")
+        data = {"savetime": int(time.time()), "hashNostaleClientX": hashNostaleClientX, "hashNostaleClient": hashNostaleClient, "version": version}
+        if(filecache):
+            fp = open('NostaleVersionCache.json',  "w+")
+            json.dump(data, fp)
+            fp.close()
+
+    return data
 
 def download_file(url, filename):
     with requests.get(url, stream=True) as r:

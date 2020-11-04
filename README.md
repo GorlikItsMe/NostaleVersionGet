@@ -18,3 +18,15 @@ print(NostaleVersionGet())
 
 # You can also use API
 https://nostale-version.herokuapp.com/
+
+
+# Extra
+If you want checking login server connection set this variables in env
+```
+LOGIN_SERVER_IP: 79.110.84.75
+LOGIN_SERVER_PORT: 4004
+LOGIN: "email@gmail.com"
+PASSWORD: "yourpassword"
+GF_ACC_ID: 0
+INSTALLATION_GUID: "e2ba7765-68d9-4694-8f9b-64ec44788349"
+```

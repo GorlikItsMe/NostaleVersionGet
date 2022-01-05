@@ -4,5 +4,5 @@ pefile==2021.9.3
 Flask==1.1.4
 noscrypto==0.2.0
 nosauth==0.1.5
-importlib-resources==1.5.0
+importlib-resources==5.4.0
 gunicorn==20.1.0

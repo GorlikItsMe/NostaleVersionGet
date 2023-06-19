@@ -1,5 +1,5 @@
 requests==2.28.0
-pefile==2022.5.30
+pefile==2023.2.7
 
 Flask==2.1.2
 noscrypto==0.2.0

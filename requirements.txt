@@ -1,7 +1,7 @@
 requests==2.28.0
 pefile==2022.5.30
 
-Flask==2.1.2
+Flask==3.0.2
 noscrypto==0.2.0
 nosauth==0.1.5
 importlib-resources==5.8.0
